@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,6 +19,7 @@ import fr.tse.fi2.hpp.labs.beans.GridPoint;
 import fr.tse.fi2.hpp.labs.beans.Route;
 import fr.tse.fi2.hpp.labs.beans.measure.QueryProcessorMeasure;
 import fr.tse.fi2.hpp.labs.dispatcher.StreamingDispatcher;
+import fr.tse.fi2.hpp.labs.queries.impl.Lab3.ThreadWriter;
 
 /**
  * Every query must extend this class that provides basic functionalities such
@@ -33,6 +36,8 @@ import fr.tse.fi2.hpp.labs.dispatcher.StreamingDispatcher;
  */
 public abstract class AbstractQueryProcessor implements Runnable {
 
+	public final LinkedBlockingQueue<String> sumList;
+	
 	final static Logger logger = LoggerFactory
 			.getLogger(AbstractQueryProcessor.class);
 
@@ -45,16 +50,20 @@ public abstract class AbstractQueryProcessor implements Runnable {
 	 */
 	private final int id = COUNTER.incrementAndGet();
 	/**
-	 * Writer to write the output of the queries
-	 */
-	private BufferedWriter outputWriter;
-	/**
 	 * Internal queue of events
 	 */
 	public final BlockingQueue<DebsRecord> eventqueue;
+	
+	
+	public ThreadWriter Thread1;
+	public Thread Thread2;
+	
 	/**
 	 * Global measurement
 	 */
+	
+	
+	
 	private final QueryProcessorMeasure measure;
 	/**
 	 * For synchronisation purpose
@@ -69,15 +78,12 @@ public abstract class AbstractQueryProcessor implements Runnable {
 		this.measure = measure;
 		// Initialize queue
 		this.eventqueue = new LinkedBlockingQueue<>();
-
+		this.sumList=new LinkedBlockingQueue<String>();
+		Thread1=new ThreadWriter(sumList,id);
+		Thread2=new Thread(Thread1);
+		Thread2.start();
 		// Initialize writer
-		try {
-			outputWriter = new BufferedWriter(new FileWriter(new File(
-					"result/query" + id + ".txt")));
-		} catch (IOException e) {
-			logger.error("Cannot open output file for " + id, e);
-			System.exit(-1);
-		}
+
 	}
 
 	public void setLatch(CountDownLatch latch) {
@@ -91,6 +97,7 @@ public abstract class AbstractQueryProcessor implements Runnable {
 		measure.notifyStart(this.id);
 		while (true) {
 			try {
+				
 				DebsRecord record = eventqueue.take();
 				if (record.isPoisonPill()) {
 					break;
@@ -192,32 +199,17 @@ public abstract class AbstractQueryProcessor implements Runnable {
 	 *            the line to write as an answer
 	 */
 	protected void writeLine(String line) {
-		try {
-			outputWriter.write(line);
-			outputWriter.newLine();
-		} catch (IOException e) {
-			logger.error("Could not write new line for query processor " + id
-					+ ", line content " + line, e);
-		}
+			
+		sumList.add(line);
+		
 
 	}
 
-	/**
-	 * Poison pill has been received, close output
-	 */
-	protected void finish() {
-		// Close writer
-		try {
-			outputWriter.flush();
-			outputWriter.close();
-		} catch (IOException e) {
-			logger.error("Cannot property close the output file for query "
-					+ id, e);
-		}
-		// Notify finish time
+	
+	protected void finish(){
 		measure.notifyFinish(this.id);
-		// Decrease latch count
 		latch.countDown();
+		Thread1.poison=true;
 	}
 
 }

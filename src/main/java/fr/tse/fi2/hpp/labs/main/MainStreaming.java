@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import fr.tse.fi2.hpp.labs.beans.measure.QueryProcessorMeasure;
 import fr.tse.fi2.hpp.labs.dispatcher.StreamingDispatcher;
 import fr.tse.fi2.hpp.labs.queries.AbstractQueryProcessor;
-import fr.tse.fi2.hpp.labs.queries.impl.SimpleQuerySumEvent;
+import fr.tse.fi2.hpp.labs.queries.impl.Lab5.BloomPlease;
 
 /**
  * Main class of the program. Register your new queries here
@@ -40,7 +40,9 @@ public class MainStreaming {
 		// Query processors
 		List<AbstractQueryProcessor> processors = new ArrayList<>();
 		// Add you query processor here
-		processors.add(new SimpleQuerySumEvent(measure));
+		BloomPlease q = new BloomPlease(measure,1000,0.001);
+		processors.add(q);
+		
 		// Register query processors
 		for (AbstractQueryProcessor queryProcessor : processors) {
 			dispatch.registerQueryProcessor(queryProcessor);
@@ -71,7 +73,15 @@ public class MainStreaming {
 		// Output measure and ratio per query processor
 		measure.setProcessedRecords(dispatch.getRecords());
 		measure.outputMeasure();
+		BloomPlease.contains("07290D3599E7A0D62097A346EFCC1FB5,E7750A37CAB07D0DFF0AF7E3573AC141,2013-01-01 00:00:00,2013-01-01 00:02:00,120,0.44,-73.956528,40.716976,-73.962440,40.715008,CSH,3.50,0.50,0.50,0.00,0.00,4.50");
 
+		/*logger.info(new Integer(q.getRecs().size()).toString());
+		
+		boolean res =q.searchRec(-73.956528f, 40.716976f, -73.962440f, 40.715008f, "chocolat");
+		System.out.println( res);*/
+		
+		
+		
 	}
 
 }
