@@ -67,8 +67,8 @@ public class BloomPlease extends AbstractQueryProcessor {
 	       
 	        BigInteger bigInt = new BigInteger(1, hash);
 	        res = bigInt.mod(BigInteger.valueOf(m));
-	        System.out.println(" "+res + "  ");
-	        System.out.println(" "+res.bitLength()+" ");
+	        System.out.println("résultat : "+res + "  ");
+	        System.out.println("taille en bits : "+res.bitLength()+" ");
 	        output = res.toString(16);
 	        while ( output.length() < 32 ) {
 	            output = "0"+output;
