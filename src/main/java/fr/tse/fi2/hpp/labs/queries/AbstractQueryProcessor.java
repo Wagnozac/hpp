@@ -134,7 +134,7 @@ public abstract class AbstractQueryProcessor implements Runnable {
 		float lat1 = record.getPickup_latitude();
 		float long1 = record.getPickup_longitude();
 		GridPoint pickup = convert(lat1, long1);
-		// Convert pickup coordinates into cell
+		// Convert dropoff coordinates into cell
 		float lat2 = record.getDropoff_latitude();
 		float long2 = record.getDropoff_longitude();
 		GridPoint dropoff = convert(lat2, long2);
